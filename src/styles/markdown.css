@@ -1,1 +1,81 @@
-/* Task 10 填充渲染区样式 */
+/* 渲染区排版：github-markdown-css 在 main.ts 引入，这里做主题变量覆盖 + 插件样式 */
+
+.markdown-body {
+  background: var(--bg-preview);
+  color: var(--text-primary);
+  padding: 24px 32px;
+  overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .markdown-body {
+  color-scheme: dark;
+}
+
+/* KaTeX */
+.math-block {
+  overflow-x: auto;
+  padding: 8px 0;
+}
+.katex {
+  font-size: 1.05em;
+}
+
+/* Mermaid */
+.mermaid-source {
+  display: none;
+}
+.mermaid-source-visible {
+  display: block;
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+.mermaid-diagram {
+  text-align: center;
+  padding: 12px 0;
+  overflow-x: auto;
+}
+.mermaid-error-bar {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+/* highlight.js 暗色覆盖（浅色用 github 主题，见 main.ts 引入） */
+[data-theme='dark'] .markdown-body pre code.hljs,
+[data-theme='dark'] .markdown-body pre code {
+  color: #e6edf3;
+}
+[data-theme='dark'] .hljs-keyword,
+[data-theme='dark'] .hljs-selector-tag { color: #ff7b72; }
+[data-theme='dark'] .hljs-string,
+[data-theme='dark'] .hljs-attr { color: #a5d6ff; }
+[data-theme='dark'] .hljs-comment { color: #8b949e; }
+[data-theme='dark'] .hljs-number,
+[data-theme='dark'] .hljs-literal { color: #79c0ff; }
+[data-theme='dark'] .hljs-title,
+[data-theme='dark'] .hljs-title.function_ { color: #d2a8ff; }
+[data-theme='dark'] .hljs-built_in { color: #ffa657; }
+
+/* 打印：只输出预览区 */
+@media print {
+  .tab-bar,
+  .toolbar,
+  .toc-sidebar,
+  .editor-pane {
+    display: none !important;
+  }
+  .preview-pane {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
