@@ -1,1 +1,28 @@
-/* Task 8 填充主题变量 */
+:root,
+[data-theme='light'] {
+  --bg-app: #f3f4f6;
+  --bg-editor: #ffffff;
+  --bg-preview: #ffffff;
+  --bg-sidebar: #fafafa;
+  --bg-toolbar: #ffffff;
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --border: #d0d7de;
+  --accent: #0969da;
+  --error-bg: #ffebe9;
+  --error-text: #cf222e;
+}
+
+[data-theme='dark'] {
+  --bg-app: #0d1117;
+  --bg-editor: #161b22;
+  --bg-preview: #0d1117;
+  --bg-sidebar: #161b22;
+  --bg-toolbar: #161b22;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --error-bg: #3d1d1f;
+  --error-text: #f85149;
+}
