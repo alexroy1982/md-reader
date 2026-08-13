@@ -5,6 +5,7 @@ import Toolbar from '@/components/Toolbar.vue'
 import TocSidebar from '@/components/TocSidebar.vue'
 import Editor from '@/components/Editor.vue'
 import Preview from '@/components/Preview.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import { useTabsStore } from '@/stores/tabs'
 import { useSettingsStore } from '@/stores/settings'
 import { useRecentsStore, fileName } from '@/stores/recents'
@@ -68,14 +69,51 @@ async function saveActive(): Promise<void> {
   }
 }
 
-function onCloseTab(id: string): void {
-  // Task 14 加未保存确认
+// 确认弹窗状态
+const confirmVisible = ref(false)
+const confirmMessage = ref('')
+let confirmResolve: ((value: string) => void) | null = null
+
+function askConfirm(message: string): Promise<string> {
+  confirmMessage.value = message
+  confirmVisible.value = true
+  return new Promise((resolve) => {
+    confirmResolve = resolve
+  })
+}
+
+function onConfirmResolve(value: string): void {
+  confirmVisible.value = false
+  confirmResolve?.(value)
+  confirmResolve = null
+}
+
+// 保存指定标签（供关闭确认复用；复用 saveActive 前先激活）
+async function saveTab(id: string): Promise<void> {
+  tabs.setActive(id)
+  await saveActive()
+}
+
+// 关闭单个标签：脏则询问
+async function onCloseTab(id: string): Promise<void> {
+  const tab = tabs.tabs.find((t) => t.id === id)
+  if (!tab) return
+  if (tabs.isDirty(tab)) {
+    const choice = await askConfirm(`「${tab.title}」有未保存的更改`)
+    if (choice === 'cancel') return
+    if (choice === 'save') {
+      await saveTab(id)
+      if (tabs.isDirty(tab)) return // 未保存成功（如取消另存对话框），视为取消关闭
+    }
+  }
   tabs.closeTab(id)
 }
 
 let unbindSync: (() => void) | null = null
 let unbindShortcuts: (() => void) | null = null
 let unlistenOpenFile: (() => void) | null = null
+let unlistenDragDrop: (() => void) | null = null
+let unlistenClose: (() => void) | null = null
 
 onMounted(async () => {
   await settings.load()
@@ -98,6 +136,33 @@ onMounted(async () => {
       void openPath(event.payload)
     })
     await emit('frontend-ready')
+
+    const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
+    const { getCurrentWindow } = await import('@tauri-apps/api/window')
+
+    unlistenDragDrop = await getCurrentWebviewWindow().onDragDropEvent((event) => {
+      if (event.payload.type === 'drop') {
+        for (const p of event.payload.paths) {
+          if (/\.(md|markdown)$/i.test(p)) void openPath(p)
+        }
+      }
+    })
+
+    unlistenClose = await getCurrentWindow().onCloseRequested(async (event) => {
+      const dirty = tabs.tabs.filter((t) => tabs.isDirty(t))
+      if (dirty.length === 0) return
+      event.preventDefault()
+      const choice = await askConfirm(`有 ${dirty.length} 个标签页包含未保存的更改`)
+      if (choice === 'cancel') return
+      if (choice === 'save') {
+        for (const t of dirty) await saveTab(t.id)
+        if (tabs.tabs.some((t) => tabs.isDirty(t))) return // 有未成功保存的，放弃关闭
+      } else {
+        // discard：先清脏标记，否则下面的 close() 会再次触发本拦截造成死循环
+        for (const t of dirty) tabs.markSaved(t.id)
+      }
+      await getCurrentWindow().close()
+    })
   }
 })
 
@@ -117,6 +182,8 @@ onBeforeUnmount(() => {
   unbindSync?.()
   unbindShortcuts?.()
   unlistenOpenFile?.()
+  unlistenDragDrop?.()
+  unlistenClose?.()
 })
 </script>
 
@@ -136,6 +203,16 @@ onBeforeUnmount(() => {
         @select="(slug) => previewRef?.scrollToHeading(slug)"
       />
     </div>
+    <ConfirmDialog
+      v-if="confirmVisible"
+      :message="confirmMessage"
+      :buttons="[
+        { label: '保存', value: 'save', primary: true },
+        { label: '不保存', value: 'discard' },
+        { label: '取消', value: 'cancel' },
+      ]"
+      @resolve="onConfirmResolve"
+    />
   </div>
 </template>
 
