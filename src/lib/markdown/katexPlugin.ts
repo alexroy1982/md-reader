@@ -72,6 +72,7 @@ function mathBlock(state: StateBlock, startLine: number, endLine: number, silent
   const firstLineRest = state.src.slice(startPos + 2, maxPos)
   const inlineClose = firstLineRest.indexOf('$$')
   if (inlineClose !== -1 && firstLineRest.slice(inlineClose + 2).trim() === '') {
+    if (firstLineRest.slice(0, inlineClose).trim() === '') return false
     if (silent) return true
     const token = state.push('math_block', '', 0)
     token.block = true
@@ -95,6 +96,9 @@ function mathBlock(state: StateBlock, startLine: number, endLine: number, silent
   if (silent) return true
 
   const content = state.src.slice(startPos + 2, state.bMarks[closeLine])
+  if (content.trim() === '') return false
+  if (silent) return true
+
   const token = state.push('math_block', '', 0)
   token.block = true
   token.content = content

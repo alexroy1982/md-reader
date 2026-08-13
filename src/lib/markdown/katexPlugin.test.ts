@@ -30,4 +30,12 @@ describe('katexPlugin 块级公式', () => {
     const { html } = renderMarkdown('$$x^2 + y^2 = z^2$$')
     expect(html).toContain('math-block')
   })
+  it('空块级公式 $$$$ 不渲染', () => {
+    const { html } = renderMarkdown('$$$$')
+    expect(html).not.toContain('math-block')
+  })
+  it('空多行块级公式不渲染', () => {
+    const { html } = renderMarkdown('$$\n\n$$')
+    expect(html).not.toContain('math-block')
+  })
 })
