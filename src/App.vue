@@ -77,6 +77,20 @@ async function exportHtml(): Promise<void> {
   await exportCurrentHtml(tab.title, previewRef.value?.bodyHtml() ?? '', settings.theme)
 }
 
+// window.print() 在 WebView2 静默无效；Tauri 环境走 Rust command 调 WebView2 原生打印对话框
+function printPage(): void {
+  if ('__TAURI_INTERNALS__' in window) {
+    void import('@tauri-apps/api/core').then(({ invoke }) =>
+      invoke('print_page').catch((e) => {
+        console.error('打印失败', e)
+        window.alert(`打印失败：${e}`)
+      })
+    )
+  } else {
+    window.print() // 纯浏览器 dev 回退
+  }
+}
+
 // 确认弹窗状态
 const confirmVisible = ref(false)
 const confirmMessage = ref('')
@@ -131,7 +145,7 @@ onMounted(async () => {
     save: saveActive,
     open: openDialog,
     newTab: () => { tabs.newTab() },
-    print: () => window.print(),
+    print: printPage,
     search: () => editorRef.value?.focusSearch(),
     nextTab: () => tabs.stepTab(1),
     prevTab: () => tabs.stepTab(-1),
@@ -197,7 +211,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="app-shell">
-    <Toolbar @open="openDialog" @new="tabs.newTab()" @save="saveActive" @export-html="exportHtml" @print="() => window.print()">
+    <Toolbar @open="openDialog" @new="tabs.newTab()" @save="saveActive" @export-html="exportHtml" @print="printPage">
       <template #recents>
         <RecentsMenu @open="(path) => void openPath(path)" />
       </template>

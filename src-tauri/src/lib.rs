@@ -2,6 +2,32 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 
 use tauri::{Emitter, Listener, Manager, WebviewWindow};
+use webview2_com::Microsoft::Web::WebView2::Win32::{
+    ICoreWebView2_16, COREWEBVIEW2_PRINT_DIALOG_KIND_SYSTEM,
+};
+use windows::core::Interface;
+
+/// window.print() 在 WebView2 静默无效；改为调 WebView2 原生打印对话框。
+/// with_webview 闭包必须返回 ()，结果经 mpsc 通道传出，错误全部回传前端。
+#[tauri::command]
+fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    window
+        .with_webview(move |webview| unsafe {
+            let result = (|| {
+                let controller = webview.controller();
+                let core = controller.CoreWebView2().map_err(|e| e.to_string())?;
+                let core16: ICoreWebView2_16 = core.cast().map_err(|e| e.to_string())?;
+                core16
+                    .ShowPrintUI(COREWEBVIEW2_PRINT_DIALOG_KIND_SYSTEM)
+                    .map_err(|e| e.to_string())?;
+                Ok::<(), String>(())
+            })();
+            let _ = tx.send(result);
+        })
+        .map_err(|e| e.to_string())?;
+    rx.recv().map_err(|e| e.to_string())?
+}
 
 /// 前端就绪门控：Tauri 事件不排队，前端未完成 listen 前 emit 的 open-file 会丢失。
 /// 就绪前把路径存入 pending 队列，由 'frontend-ready' 统一触发依次 emit。
@@ -53,6 +79,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![print_page])
         .setup(|app| {
             // 首次启动带文件参数（双击 .md 冷启动）：与二次实例同走 pending 队列
             let args: Vec<String> = std::env::args().collect();

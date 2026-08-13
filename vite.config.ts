@@ -12,5 +12,5 @@ export default defineConfig({
   clearScreen: false,
   server: { port: 1420, strictPort: true },
   build: { chunkSizeWarningLimit: 3000 },
-  test: { environment: 'jsdom' },
+  test: { environment: 'jsdom', css: true },
 })

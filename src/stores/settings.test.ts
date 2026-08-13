@@ -42,6 +42,19 @@ describe('settings store', () => {
     expect(document.documentElement.dataset.theme).toBe('dark')
   })
 
+  it('setTheme 注入对应主题的 github-markdown 样式', async () => {
+    const s = useSettingsStore()
+    await s.setTheme('light')
+    const el = document.getElementById('gh-markdown-theme')
+    expect(el).not.toBeNull()
+    const lightContent = el!.textContent
+    expect(lightContent).toBeTruthy()
+    await s.setTheme('dark')
+    const darkContent = document.getElementById('gh-markdown-theme')!.textContent
+    expect(darkContent).toBeTruthy()
+    expect(darkContent).not.toBe(lightContent)
+  })
+
   it('toggle 在明暗间切换', async () => {
     const s = useSettingsStore()
     await s.toggle()

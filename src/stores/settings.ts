@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Theme } from '@/types'
+import { applyMarkdownTheme } from '@/lib/markdownTheme'
 import { Store } from '@tauri-apps/plugin-store'
 
 let storePromise: Promise<Store> | null = null
@@ -17,6 +18,7 @@ export const useSettingsStore = defineStore('settings', () => {
     if (typeof document !== 'undefined') {
       document.documentElement.dataset.theme = t
     }
+    applyMarkdownTheme(t)
   }
 
   async function load(): Promise<void> {
