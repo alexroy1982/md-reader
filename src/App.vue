@@ -12,6 +12,7 @@ import { useRecentsStore, fileName } from '@/stores/recents'
 import { registerShortcuts } from '@/composables/useShortcuts'
 import { setupScrollSync } from '@/composables/useScrollSync'
 import { openMarkdownDialog, saveMarkdownDialog, readMarkdown, writeMarkdown } from '@/composables/useFileIO'
+import { exportCurrentHtml } from '@/composables/useExport'
 
 const tabs = useTabsStore()
 const settings = useSettingsStore()
@@ -67,6 +68,12 @@ async function saveActive(): Promise<void> {
     console.error('保存失败', err)
     window.alert(`保存失败：${path}`)
   }
+}
+
+async function exportHtml(): Promise<void> {
+  const tab = tabs.activeTab
+  if (!tab) return
+  await exportCurrentHtml(tab.title, previewRef.value?.bodyHtml() ?? '', settings.theme)
 }
 
 // 确认弹窗状态
@@ -189,7 +196,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="app-shell">
-    <Toolbar @open="openDialog" @new="tabs.newTab()" @save="saveActive" />
+    <Toolbar @open="openDialog" @new="tabs.newTab()" @save="saveActive" @export-html="exportHtml" @print="() => window.print()" />
     <TabBar @close="onCloseTab" />
     <div class="main-area">
       <div class="editor-pane">
