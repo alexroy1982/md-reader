@@ -7,21 +7,52 @@ import Editor from '@/components/Editor.vue'
 import Preview from '@/components/Preview.vue'
 import { useTabsStore } from '@/stores/tabs'
 import { useSettingsStore } from '@/stores/settings'
+import { useRecentsStore, fileName } from '@/stores/recents'
 import { registerShortcuts } from '@/composables/useShortcuts'
 import { setupScrollSync } from '@/composables/useScrollSync'
+import { openMarkdownDialog, saveMarkdownDialog, readMarkdown, writeMarkdown } from '@/composables/useFileIO'
 
 const tabs = useTabsStore()
 const settings = useSettingsStore()
+const recents = useRecentsStore()
 
 const editorRef = ref<InstanceType<typeof Editor> | null>(null)
 const previewRef = ref<InstanceType<typeof Preview> | null>(null)
 
-function saveActive(): void {
-  // Task 12 接文件写入；本任务仅占位保证快捷键链路通
+async function openPath(path: string): Promise<void> {
+  try {
+    const content = await readMarkdown(path)
+    tabs.openFileTab(path, fileName(path), content)
+    await recents.add(path)
+  } catch (err) {
+    console.error('打开文件失败', err)
+    window.alert(`无法打开文件：${path}`)
+  }
 }
 
-function openDialog(): void {
-  // Task 12 接文件对话框
+async function openDialog(): Promise<void> {
+  const path = await openMarkdownDialog()
+  if (path) await openPath(path)
+}
+
+async function saveActive(): Promise<void> {
+  const tab = tabs.activeTab
+  if (!tab || !tabs.isDirty(tab)) return
+  let path = tab.path
+  if (!path) {
+    path = await saveMarkdownDialog()
+    if (!path) return
+    tab.path = path
+    tab.title = fileName(path)
+    await recents.add(path)
+  }
+  try {
+    await writeMarkdown(path, tab.content)
+    tabs.markSaved(tab.id)
+  } catch (err) {
+    console.error('保存失败', err)
+    window.alert(`保存失败：${path}`)
+  }
 }
 
 function onCloseTab(id: string): void {
@@ -34,6 +65,7 @@ let unbindShortcuts: (() => void) | null = null
 
 onMounted(async () => {
   await settings.load()
+  await recents.load()
   if (tabs.tabs.length === 0) tabs.newTab()
   unbindShortcuts = registerShortcuts({
     save: saveActive,
