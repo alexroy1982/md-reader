@@ -90,6 +90,32 @@ describe('renderMermaidBlocks', () => {
     expect(root2.innerHTML).toContain('new')
   })
 
+  it('跨主题并发时旧主题结果不入缓存', async () => {
+    let resolveLight!: (v: { svg: string }) => void
+    mockMermaidRender.mockImplementationOnce(
+      () => new Promise((r) => { resolveLight = r })
+    )
+    mockMermaidRender.mockResolvedValue({ svg: '<svg>dark</svg>' })
+
+    const root1 = makeRoot(['graph TD\nA-->B'])
+    const p1 = renderMermaidBlocks(root1, 'light')
+    // 等待懒加载完成、第一个 render 进入执行
+    await new Promise((r) => setTimeout(r, 0))
+
+    const root2 = makeRoot(['graph TD\nA-->B'])
+    await renderMermaidBlocks(root2, 'dark')
+
+    resolveLight({ svg: '<svg>light-stale</svg>' })
+    await p1
+
+    mockMermaidRender.mockResolvedValue({ svg: '<svg>light</svg>' })
+    const root3 = makeRoot(['graph TD\nA-->B'])
+    await renderMermaidBlocks(root3, 'light')
+
+    expect(mockMermaidRender).toHaveBeenCalledTimes(3)
+    expect(root3.querySelector('.mermaid-diagram')?.innerHTML).toContain('<svg>light</svg>')
+  })
+
   it('并发上限为 2', async () => {
     let inFlight = 0
     let maxInFlight = 0

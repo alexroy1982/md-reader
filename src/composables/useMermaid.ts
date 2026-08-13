@@ -92,7 +92,10 @@ export async function renderMermaidBlocks(root: HTMLElement, theme: Theme): Prom
       let entry = cache.get(key)
       if (!entry) {
         entry = await renderOne(mermaid, source)
-        cache.set(key, entry)
+        // 若 await 期间有其它调用切了主题，则该结果不能按本次 theme 入缓存
+        if (initializedTheme === theme) {
+          cache.set(key, entry)
+        }
       }
       if (token !== activeToken) continue // 过期：结果已缓存，跳过 DOM 写入
       if (!el.isConnected) continue
