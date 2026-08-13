@@ -75,6 +75,7 @@ function onCloseTab(id: string): void {
 
 let unbindSync: (() => void) | null = null
 let unbindShortcuts: (() => void) | null = null
+let unlistenOpenFile: (() => void) | null = null
 
 onMounted(async () => {
   await settings.load()
@@ -89,6 +90,15 @@ onMounted(async () => {
     nextTab: () => tabs.stepTab(1),
     prevTab: () => tabs.stepTab(-1),
   })
+
+  // Tauri 环境：监听 Rust 发来的 open-file（双击关联文件 / 二次实例）
+  if ('__TAURI_INTERNALS__' in window) {
+    const { listen, emit } = await import('@tauri-apps/api/event')
+    unlistenOpenFile = await listen<string>('open-file', (event) => {
+      void openPath(event.payload)
+    })
+    await emit('frontend-ready')
+  }
 })
 
 // 编辑区 ↔ 预览区滚动同步（编辑器 mount 后建立，activeId 变化不影响 DOM 元素）
@@ -106,6 +116,7 @@ watch(
 onBeforeUnmount(() => {
   unbindSync?.()
   unbindShortcuts?.()
+  unlistenOpenFile?.()
 })
 </script>
 
