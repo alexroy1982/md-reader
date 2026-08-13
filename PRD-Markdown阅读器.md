@@ -114,7 +114,7 @@
 - 支持上/下一个、高亮所有匹配。
 
 ### F9. 导出 PDF / HTML（✅）
-- **导出 HTML**：渲染后 DOM + 内联 CSS → Blob 下载为 .html（前端纯实现，可靠）。
+- **导出 HTML**：渲染后 DOM + 内联 CSS → 保存对话框写盘为 .html（WebView2 不支持 Blob 下载，改走 Tauri fs；纯浏览器 dev 回退 Blob）。
 - **导出 PDF**：调用 Tauri WebView 打印 → 系统打印对话框 → 另存为 PDF（Ctrl+P）。
 
 ### F10. 最近打开文件列表（✅）

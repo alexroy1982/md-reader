@@ -183,7 +183,13 @@ onMounted(async () => {
         // discard：先清脏标记，否则下面的 close() 会再次触发本拦截造成死循环
         for (const t of dirty) tabs.markSaved(t.id)
       }
-      await getCurrentWindow().close()
+      try {
+        await getCurrentWindow().close()
+      } catch (err) {
+        // 权限缺失等异常不能静默： preventDefault 已生效，静默会让窗口永远无法关闭
+        console.error('关闭窗口失败', err)
+        window.alert(`关闭窗口失败：${err}`)
+      }
     })
   }
 })
