@@ -2,6 +2,7 @@ import githubLightCss from 'github-markdown-css/github-markdown-light.css?raw'
 import githubDarkCss from 'github-markdown-css/github-markdown-dark.css?raw'
 import katexCss from 'katex/dist/katex.min.css?raw'
 import markdownCss from '@/styles/markdown.css?raw'
+import themeCss from '@/styles/theme.css?raw'
 import { buildStandaloneHtml } from '@/lib/export/exportHtml'
 import type { Theme } from '@/types'
 
@@ -41,6 +42,7 @@ export async function exportCurrentHtml(title: string, bodyHtml: string, theme: 
     githubCss: theme === 'dark' ? githubDarkCss : githubLightCss,
     katexCss,
     markdownCss,
+    themeCss,
     katexFonts,
   })
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' })

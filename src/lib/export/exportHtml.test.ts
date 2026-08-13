@@ -22,6 +22,7 @@ describe('buildStandaloneHtml', () => {
     githubCss: '.markdown-body{color:#000}',
     katexCss: '.katex{font-size:1em}',
     markdownCss: '.math-block{padding:8px}',
+    themeCss: ':root{--bg-preview:#fff}',
     katexFonts: {},
   })
   it('包含转义后的标题', () => {
@@ -31,6 +32,9 @@ describe('buildStandaloneHtml', () => {
     expect(html).toContain('.markdown-body{color:#000}')
     expect(html).toContain('.katex{font-size:1em}')
     expect(html).toContain('<h1 id="a">A</h1>')
+  })
+  it('内联 theme.css 的 CSS 变量', () => {
+    expect(html).toContain(':root{--bg-preview:#fff}')
   })
   it('带 data-theme 属性', () => {
     expect(html).toContain('data-theme="dark"')

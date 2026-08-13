@@ -7,6 +7,7 @@ export interface ExportData {
   githubCss: string
   katexCss: string
   markdownCss: string
+  themeCss: string
   katexFonts: Record<string, string> // 文件名 → data URI
 }
 
@@ -30,6 +31,7 @@ export function buildStandaloneHtml(data: ExportData): string {
 <title>${escapeTitle(data.title)}</title>
 <style>${data.githubCss}</style>
 <style>${inlineKatexFonts(data.katexCss, data.katexFonts)}</style>
+<style>${data.themeCss}</style>
 <style>${data.markdownCss}</style>
 </head>
 <body>
