@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@import "./theme.css";
+@import "./markdown.css";
+
+html, body, #app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+}
