@@ -2,6 +2,7 @@
 import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
 import TabBar from '@/components/TabBar.vue'
 import Toolbar from '@/components/Toolbar.vue'
+import RecentsMenu from '@/components/RecentsMenu.vue'
 import TocSidebar from '@/components/TocSidebar.vue'
 import Editor from '@/components/Editor.vue'
 import Preview from '@/components/Preview.vue'
@@ -196,7 +197,11 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="app-shell">
-    <Toolbar @open="openDialog" @new="tabs.newTab()" @save="saveActive" @export-html="exportHtml" @print="() => window.print()" />
+    <Toolbar @open="openDialog" @new="tabs.newTab()" @save="saveActive" @export-html="exportHtml" @print="() => window.print()">
+      <template #recents>
+        <RecentsMenu @open="(path) => void openPath(path)" />
+      </template>
+    </Toolbar>
     <TabBar @close="onCloseTab" />
     <div class="main-area">
       <div class="editor-pane">
