@@ -31,8 +31,14 @@ async function openPath(path: string): Promise<void> {
 }
 
 async function openDialog(): Promise<void> {
-  const path = await openMarkdownDialog()
-  if (path) await openPath(path)
+  try {
+    const path = await openMarkdownDialog()
+    if (path) await openPath(path)
+  } catch (err) {
+    // 非 tauri 环境（纯浏览器 dev）dialog 插件不可用
+    console.error('打开文件对话框失败', err)
+    window.alert('当前环境不支持文件对话框')
+  }
 }
 
 async function saveActive(): Promise<void> {
@@ -40,7 +46,14 @@ async function saveActive(): Promise<void> {
   if (!tab || !tabs.isDirty(tab)) return
   let path = tab.path
   if (!path) {
-    path = await saveMarkdownDialog()
+    try {
+      path = await saveMarkdownDialog()
+    } catch (err) {
+      // 非 tauri 环境（纯浏览器 dev）dialog 插件不可用
+      console.error('打开保存对话框失败', err)
+      window.alert('当前环境不支持文件对话框')
+      return
+    }
     if (!path) return
     tab.path = path
     tab.title = fileName(path)
