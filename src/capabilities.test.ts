@@ -11,4 +11,8 @@ describe('tauri capabilities', () => {
   it('包含 core:window:allow-close（关窗拦截的程序化 close 依赖它）', () => {
     expect(caps.permissions).toContain('core:window:allow-close')
   })
+
+  it('包含 core:window:allow-destroy（onCloseRequested 未拦截时 Tauri 自动 destroy，缺它窗口永远无法关闭）', () => {
+    expect(caps.permissions).toContain('core:window:allow-destroy')
+  })
 })
