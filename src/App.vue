@@ -142,7 +142,6 @@ onMounted(async () => {
   await settings.load()
   await recents.load()
   sidebarOpen.value = true
-  if (tabs.tabs.length === 0) tabs.newTab()
   unbindShortcuts = registerShortcuts({
     save: saveActive,
     open: openDialog,
