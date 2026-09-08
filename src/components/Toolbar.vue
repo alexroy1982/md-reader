@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ThemeToggle from './ThemeToggle.vue'
 
-defineProps<{ sidebarOpen: boolean; editorVisible: boolean; documentTitle: string }>()
+defineProps<{ sidebarOpen: boolean; editorVisible: boolean }>()
 const emit = defineEmits<{
   (e: 'open'): void
   (e: 'new'): void
@@ -15,9 +15,7 @@ const emit = defineEmits<{
 
 <template>
   <header class="toolbar">
-    <div class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></div>
     <button class="icon-button" :aria-label="sidebarOpen ? '隐藏侧边栏' : '显示侧边栏'" :title="sidebarOpen ? '隐藏侧边栏' : '显示侧边栏'" @click="emit('toggle-sidebar')">☰</button>
-    <div class="document-title" :title="documentTitle">{{ documentTitle }}</div>
     <div class="toolbar-actions">
       <button @click="emit('open')">打开</button>
       <button @click="emit('new')">新建</button>
@@ -46,14 +44,8 @@ const emit = defineEmits<{
   border-bottom: 1px solid var(--separator);
   backdrop-filter: blur(18px);
 }
-.traffic-lights { display: flex; gap: 6px; margin-right: 5px; }
-.traffic-lights i { width: 11px; height: 11px; border-radius: 50%; background: var(--traffic-neutral); }
-.traffic-lights i:first-child { background: #ff5f57; }
-.traffic-lights i:nth-child(2) { background: #febc2e; }
-.traffic-lights i:last-child { background: #28c840; }
 .icon-button { border: 0; background: transparent; color: var(--text-secondary); font-size: 17px; cursor: pointer; }
 .icon-button:hover { color: var(--text-primary); }
-.document-title { width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 600; }
 .toolbar-actions { display: flex; align-items: center; gap: 6px; }
 button:not(.icon-button) { border: 1px solid var(--control-border); background: var(--control-bg); color: var(--text-primary); border-radius: var(--control-radius); padding: 6px 10px; cursor: pointer; font-size: 12px; }
 button:not(.icon-button):hover { background: var(--control-hover-bg); border-color: var(--accent); }

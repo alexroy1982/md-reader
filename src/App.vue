@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch, nextTick, computed } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
 import TabBar from '@/components/TabBar.vue'
 import Toolbar from '@/components/Toolbar.vue'
 import WorkspaceSidebar from '@/components/WorkspaceSidebar.vue'
@@ -21,8 +21,6 @@ const recents = useRecentsStore()
 const editorRef = ref<InstanceType<typeof Editor> | null>(null)
 const previewRef = ref<InstanceType<typeof Preview> | null>(null)
 const sidebarOpen = ref(true)
-
-const documentTitle = computed(() => tabs.activeTab?.title ?? '未命名')
 
 async function openPath(path: string): Promise<void> {
   try {
@@ -239,7 +237,6 @@ onBeforeUnmount(() => {
     <Toolbar
       :sidebar-open="sidebarOpen"
       :editor-visible="settings.editorVisible"
-      :document-title="documentTitle"
       @open="openDialog"
       @new="tabs.newTab()"
       @save="saveActive"
@@ -316,7 +313,6 @@ onBeforeUnmount(() => {
 .toolbar-recent { color: var(--text-secondary); font-size: 11px; white-space: nowrap; }
 @media (max-width: 900px) {
   .workspace-sidebar { width: 210px; flex-basis: 210px; }
-  .document-title { display: none; }
 }
 
 </style>

@@ -66,6 +66,33 @@ describe('exportCurrentHtml（Tauri 环境）', () => {
 
     expect(window.alert).toHaveBeenCalled()
   })
+
+  it('字体加载失败时仍先弹保存对话框并完成导出（降级不阻塞）', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('font blocked by CSP') }))
+    mockSave.mockResolvedValue('C:\\docs\\demo.html')
+    mockWriteTextFile.mockResolvedValue(undefined)
+
+    await exportCurrentHtml('demo.md', '<p>正文</p>', 'light')
+
+    expect(mockSave).toHaveBeenCalledTimes(1)
+    expect(mockWriteTextFile).toHaveBeenCalledTimes(1)
+    const [path, html] = mockWriteTextFile.mock.calls[0] as [string, string]
+    expect(path).toBe('C:\\docs\\demo.html')
+    expect(html).toContain('<!DOCTYPE html>')
+    expect(window.alert).not.toHaveBeenCalled()
+  })
+
+  it('字体请求挂起超时后仍完成导出（不无限等待）', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Promise(() => {}))) // 永不 resolve
+    mockSave.mockResolvedValue('C:\\docs\\demo.html')
+    mockWriteTextFile.mockResolvedValue(undefined)
+
+    await exportCurrentHtml('demo.md', '<p>正文</p>', 'light')
+
+    expect(mockSave).toHaveBeenCalledTimes(1)
+    expect(mockWriteTextFile).toHaveBeenCalledTimes(1)
+    expect(window.alert).not.toHaveBeenCalled()
+  })
 })
 
 describe('exportCurrentHtml（纯浏览器 dev 回退）', () => {
