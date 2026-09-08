@@ -19,7 +19,7 @@ import { exportCurrentHtml } from './useExport'
 beforeEach(() => {
   vi.clearAllMocks()
   // katex 字体加载走 fetch，测试环境用假 blob 顶替
-  vi.stubGlobal('fetch', vi.fn(async () => ({ blob: async () => new Blob(['font']) })))
+  vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, blob: async () => new Blob(['font']) })))
   vi.spyOn(window, 'alert').mockImplementation(() => {})
 })
 

@@ -8,6 +8,8 @@ const tabs = useTabsStore()
 const emit = defineEmits<{ (e: 'ready'): void }>()
 const host = ref<HTMLElement | null>(null)
 let view: EditorView | null = null
+let openSearchPanelFn: ((view: EditorView) => void) | null = null
+let suppressStoreUpdates = true
 
 function runWrap(marker: string) {
   return (v: EditorView): boolean => {
@@ -39,6 +41,8 @@ onMounted(async () => {
     import('@codemirror/search'),
     import('@codemirror/language'),
   ])
+
+  openSearchPanelFn = openSearchPanel
 
   const cmTheme = EditorView.theme({
     '&': {
@@ -84,13 +88,15 @@ onMounted(async () => {
           indentWithTab,
         ]),
         EditorView.updateListener.of((update) => {
-          if (update.docChanged && tabs.activeId) {
+          if (!suppressStoreUpdates && update.docChanged && tabs.activeId) {
             tabs.updateContent(tabs.activeId, update.state.doc.toString())
           }
         }),
       ],
     }),
   })
+  // 初始 EditorState/文档同步不是用户编辑，不能把已保存文件标成 dirty
+  suppressStoreUpdates = false
   performance.mark('app:editor-ready')
   emit('ready')
 })
@@ -102,7 +108,12 @@ watch(
     if (!view) return
     const doc = currentDoc()
     if (view.state.doc.toString() !== doc) {
-      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: doc } })
+      suppressStoreUpdates = true
+      try {
+        view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: doc } })
+      } finally {
+        suppressStoreUpdates = false
+      }
     }
   }
 )
@@ -110,12 +121,13 @@ watch(
 onBeforeUnmount(() => {
   view?.destroy()
   view = null
+  openSearchPanelFn = null
 })
 
 function focusSearch(): void {
   if (view) {
     view.focus()
-    openSearchPanel(view)
+    openSearchPanelFn?.(view)
   }
 }
 
