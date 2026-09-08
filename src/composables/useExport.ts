@@ -1,13 +1,9 @@
-import githubLightCss from 'github-markdown-css/github-markdown-light.css?raw'
-import githubDarkCss from 'github-markdown-css/github-markdown-dark.css?raw'
-import katexCss from 'katex/dist/katex.min.css?raw'
-import markdownCss from '@/styles/markdown.css?raw'
-import themeCss from '@/styles/theme.css?raw'
 import { save } from '@tauri-apps/plugin-dialog'
 import { writeTextFile } from '@tauri-apps/plugin-fs'
 import { buildStandaloneHtml } from '@/lib/export/exportHtml'
 import type { Theme } from '@/types'
 
+// 导出专用的 CSS 全部动态加载：低频功能不占用主包（github-markdown light+dark 各 22KB + markdown.css + theme.css + katex.css ≈ 90KB+）
 const fontUrls = import.meta.glob('/node_modules/katex/dist/fonts/*.woff2', {
   eager: true,
   query: '?url',
@@ -37,6 +33,14 @@ async function loadKatexFonts(): Promise<Record<string, string>> {
 
 export async function exportCurrentHtml(title: string, bodyHtml: string, theme: Theme): Promise<void> {
   try {
+    const [{ default: githubLightCss }, { default: githubDarkCss }, { default: katexCss }, { default: markdownCss }, { default: themeCss }] =
+      await Promise.all([
+        import('github-markdown-css/github-markdown-light.css?raw'),
+        import('github-markdown-css/github-markdown-dark.css?raw'),
+        import('katex/dist/katex.min.css?raw'),
+        import('@/styles/markdown.css?raw'),
+        import('@/styles/theme.css?raw'),
+      ])
     const katexFonts = await loadKatexFonts()
     const html = buildStandaloneHtml({
       title,

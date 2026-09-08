@@ -12,8 +12,12 @@ const emit = defineEmits<{ (e: 'select', slug: string): void }>()
       v-for="item in items"
       :key="item.slug"
       class="toc-item"
+      role="button"
+      tabindex="0"
       :style="{ paddingLeft: `${(item.level - 1) * 14 + 12}px` }"
       @click="emit('select', item.slug)"
+      @keydown.enter="emit('select', item.slug)"
+      @keydown.space.prevent="emit('select', item.slug)"
     >
       {{ item.text }}
     </div>

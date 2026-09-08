@@ -17,8 +17,13 @@ function onClose(tab: Tab, ev: MouseEvent): void {
       v-for="tab in tabs.tabs"
       :key="tab.id"
       class="tab"
+      role="tab"
+      :aria-selected="tab.id === tabs.activeId"
+      tabindex="0"
       :class="{ active: tab.id === tabs.activeId }"
       @click="tabs.setActive(tab.id)"
+      @keydown.enter="tabs.setActive(tab.id)"
+      @keydown.space.prevent="tabs.setActive(tab.id)"
     >
       <span class="dot" :class="{ dirty: tabs.isDirty(tab) }">●</span>
       <span class="title">{{ tab.title }}</span>

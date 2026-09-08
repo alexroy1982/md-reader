@@ -79,7 +79,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![print_page])
+        .invoke_handler(tauri::generate_handler![print_page, uptime_ms])
         .setup(|app| {
             // 首次启动带文件参数（双击 .md 冷启动）：与二次实例同走 pending 队列
             let args: Vec<String> = std::env::args().collect();
@@ -109,6 +109,7 @@ pub fn run() {
 }
 
 /// 进程已运行毫秒数：前端用它换算「进程启动 → 页面加载」的冷启动间隙（WebView2 拉起成本）
+/// 注：前端 perfDump 模块当前未启用，本命令保留备用
 #[tauri::command]
 fn uptime_ms() -> u128 {
     std::time::SystemTime::now()
