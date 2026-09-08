@@ -13,6 +13,104 @@
   color-scheme: dark;
 }
 
+/* 表格：精致的 macOS 文档风格。提高选择器优先级，覆盖运行时后注入的 github-markdown-css。 */
+html[data-theme] .markdown-body table {
+  display: table;
+  width: 100%;
+  max-width: 100%;
+  margin: 14px 0 24px;
+  overflow: hidden;
+  border: 1px solid var(--table-border);
+  border-spacing: 0;
+  border-collapse: separate;
+  border-radius: 9px;
+  background: var(--table-bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .035);
+  table-layout: fixed;
+  font-size: .92em;
+  line-height: 1.55;
+}
+
+html[data-theme] .markdown-body table th,
+html[data-theme] .markdown-body table td {
+  padding: 11px 12px;
+  border: 0;
+  border-right: 1px solid var(--table-border);
+  border-bottom: 1px solid var(--table-border);
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+html[data-theme] .markdown-body table th {
+  background: var(--table-header-bg);
+  color: var(--table-header-text);
+  font-size: .92em;
+  font-weight: 680;
+  letter-spacing: .01em;
+}
+
+html[data-theme] .markdown-body table tbody tr {
+  background: var(--table-bg);
+  transition: background-color 120ms ease;
+}
+
+html[data-theme] .markdown-body table tbody tr:nth-child(even) {
+  background: var(--table-alt-bg);
+}
+
+html[data-theme] .markdown-body table tbody tr:hover {
+  background: var(--table-hover-bg);
+}
+
+html[data-theme] .markdown-body table tr:last-child > * {
+  border-bottom: 0;
+}
+
+html[data-theme] .markdown-body table tr > *:last-child {
+  border-right: 0;
+}
+
+/* 常见业务表格按列数分配宽度，避免主题/摘要长文本把表格撑出阅读区。 */
+html[data-theme] .markdown-body table:has(tr > :nth-child(2):last-child) th:first-child { width: 30%; }
+html[data-theme] .markdown-body table:has(tr > :nth-child(2):last-child) th:nth-child(2) { width: 70%; }
+
+html[data-theme] .markdown-body table:has(tr > :nth-child(3):last-child) th:first-child { width: 18%; }
+html[data-theme] .markdown-body table:has(tr > :nth-child(3):last-child) th:nth-child(2) { width: 32%; }
+html[data-theme] .markdown-body table:has(tr > :nth-child(3):last-child) th:nth-child(3) { width: 50%; }
+
+html[data-theme] .markdown-body table:has(tr > :nth-child(4):last-child) th:first-child { width: 17%; }
+html[data-theme] .markdown-body table:has(tr > :nth-child(4):last-child) th:nth-child(2) { width: 23%; }
+html[data-theme] .markdown-body table:has(tr > :nth-child(4):last-child) th:nth-child(3) { width: 38%; }
+html[data-theme] .markdown-body table:has(tr > :nth-child(4):last-child) th:nth-child(4) { width: 22%; }
+
+/* 五列以上回到内容自适应，并在窄窗口由下方媒体查询提供横向滚动。 */
+html[data-theme] .markdown-body table:has(tr > :nth-child(5)) {
+  table-layout: auto;
+}
+
+html[data-theme] .markdown-body table td > :first-child,
+html[data-theme] .markdown-body table th > :first-child {
+  margin-top: 0;
+}
+
+html[data-theme] .markdown-body table td > :last-child,
+html[data-theme] .markdown-body table th > :last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 760px) {
+  html[data-theme] .markdown-body table {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+  }
+}
+
 /* KaTeX */
 .math-block {
   overflow-x: auto;

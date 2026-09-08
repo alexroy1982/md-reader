@@ -22,6 +22,12 @@
   --accent: #0969da;
   --error-bg: #ffebe9;
   --error-text: #cf222e;
+  --table-bg: #ffffff;
+  --table-header-bg: #f3f3f5;
+  --table-alt-bg: #fafafa;
+  --table-hover-bg: #f2f7ff;
+  --table-border: rgba(31, 35, 40, .12);
+  --table-header-text: #202124;
 }
 
 [data-theme='dark'] {
@@ -47,4 +53,10 @@
   --accent: #58a6ff;
   --error-bg: #3d1d1f;
   --error-text: #f85149;
+  --table-bg: #202124;
+  --table-header-bg: #2a2c30;
+  --table-alt-bg: #24262a;
+  --table-hover-bg: #283244;
+  --table-border: rgba(255, 255, 255, .13);
+  --table-header-text: #f1f3f4;
 }
