@@ -1,41 +1,13 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
-import { EditorView, keymap } from '@codemirror/view'
-import { EditorState } from '@codemirror/state'
-import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
-import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands'
-import { searchKeymap, openSearchPanel, highlightSelectionMatches } from '@codemirror/search'
-import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
 import { useTabsStore } from '@/stores/tabs'
 import { wrapSelection } from '@/lib/codemirror/wrapSelection'
+import type { EditorView } from '@codemirror/view'
 
 const tabs = useTabsStore()
+const emit = defineEmits<{ (e: 'ready'): void }>()
 const host = ref<HTMLElement | null>(null)
 let view: EditorView | null = null
-
-const cmTheme = EditorView.theme({
-  '&': {
-    height: '100%',
-    fontSize: '14px',
-    backgroundColor: 'var(--bg-editor)',
-    color: 'var(--text-primary)',
-  },
-  '.cm-content': {
-    fontFamily: "'Cascadia Code', Consolas, 'Courier New', monospace",
-    caretColor: 'var(--text-primary)',
-  },
-  '.cm-scroller': { overflow: 'auto' },
-  '&.cm-focused': { outline: 'none' },
-  '.cm-gutters': {
-    backgroundColor: 'var(--bg-editor)',
-    color: 'var(--text-secondary)',
-    border: 'none',
-  },
-  '.cm-panels': {
-    backgroundColor: 'var(--bg-sidebar)',
-    color: 'var(--text-primary)',
-  },
-})
 
 function runWrap(marker: string) {
   return (v: EditorView): boolean => {
@@ -50,7 +22,48 @@ function currentDoc(): string {
   return tabs.activeTab?.content ?? ''
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // CodeMirror 全家桶（数百 KB）从主包移出：编辑器组件壳先渲染，CM 异步就绪
+  const [
+    { EditorView, keymap },
+    { EditorState },
+    { markdown, markdownLanguage },
+    { defaultKeymap, history, historyKeymap, indentWithTab },
+    { searchKeymap, openSearchPanel, highlightSelectionMatches },
+    { syntaxHighlighting, defaultHighlightStyle },
+  ] = await Promise.all([
+    import('@codemirror/view'),
+    import('@codemirror/state'),
+    import('@codemirror/lang-markdown'),
+    import('@codemirror/commands'),
+    import('@codemirror/search'),
+    import('@codemirror/language'),
+  ])
+
+  const cmTheme = EditorView.theme({
+    '&': {
+      height: '100%',
+      fontSize: '14px',
+      backgroundColor: 'var(--bg-editor)',
+      color: 'var(--text-primary)',
+    },
+    '.cm-content': {
+      fontFamily: "'Cascadia Code', Consolas, 'Courier New', monospace",
+      caretColor: 'var(--text-primary)',
+    },
+    '.cm-scroller': { overflow: 'auto' },
+    '&.cm-focused': { outline: 'none' },
+    '.cm-gutters': {
+      backgroundColor: 'var(--bg-editor)',
+      color: 'var(--text-secondary)',
+      border: 'none',
+    },
+    '.cm-panels': {
+      backgroundColor: 'var(--bg-sidebar)',
+      color: 'var(--text-primary)',
+    },
+  })
+
   view = new EditorView({
     parent: host.value!,
     state: EditorState.create({
@@ -78,6 +91,8 @@ onMounted(() => {
       ],
     }),
   })
+  performance.mark('app:editor-ready')
+  emit('ready')
 })
 
 // 切换标签：编辑器内容跟随（updateListener 已保证 store 内容最新）

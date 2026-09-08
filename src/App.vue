@@ -138,6 +138,7 @@ let unlistenDragDrop: (() => void) | null = null
 let unlistenClose: (() => void) | null = null
 
 onMounted(async () => {
+  performance.mark('app:mounted')
   await settings.load()
   await recents.load()
   if (tabs.tabs.length === 0) tabs.newTab()
@@ -199,12 +200,21 @@ watch(
   () => [editorRef.value, previewRef.value],
   async () => {
     await nextTick()
-    const a = editorRef.value?.scrollEl()
-    const b = previewRef.value?.scrollEl()
-    if (a && b && !unbindSync) unbindSync = setupScrollSync(a, b)
+    trySetupScrollSync()
   },
   { immediate: true, flush: 'post' }
 )
+
+async function trySetupScrollSync(): Promise<void> {
+  await nextTick()
+  const a = editorRef.value?.scrollEl()
+  const b = previewRef.value?.scrollEl()
+  if (a && b && !unbindSync) unbindSync = setupScrollSync(a, b)
+}
+
+function onEditorReady(): void {
+  void trySetupScrollSync()
+}
 
 onBeforeUnmount(() => {
   unbindSync?.()
@@ -225,7 +235,7 @@ onBeforeUnmount(() => {
     <TabBar @close="onCloseTab" />
     <div class="main-area">
       <div class="editor-pane">
-        <Editor ref="editorRef" />
+        <Editor ref="editorRef" @ready="onEditorReady" />
       </div>
       <div class="preview-wrap">
         <Preview ref="previewRef" />

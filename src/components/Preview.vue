@@ -14,19 +14,28 @@ const result = ref<RenderResult>({ html: '', toc: [] })
 const tocItems = ref<TocItem[]>([])
 
 let timer: ReturnType<typeof setTimeout> | undefined
+let renderSeq = 0 // 渲染管线改为异步后，防止旧结果晚到覆盖新结果
+let firstRenderDone = false
 
 async function renderNow(): Promise<void> {
+  const seq = ++renderSeq
   const content = tabs.activeTab?.content ?? ''
   let next: RenderResult
   try {
-    next = renderMarkdown(content)
+    next = await renderMarkdown(content)
   } catch {
     return // 渲染管线异常：保留上一帧，绝不白屏
   }
+  if (seq !== renderSeq) return // 已有更新的渲染在途，丢弃本帧
   result.value = next
   tocItems.value = next.toc
   await nextTick()
+  if (seq !== renderSeq) return
   if (rootEl.value) await renderMermaidBlocks(rootEl.value, settings.theme)
+  if (!firstRenderDone) {
+    firstRenderDone = true
+    performance.mark('app:first-render-done')
+  }
 }
 
 watch(

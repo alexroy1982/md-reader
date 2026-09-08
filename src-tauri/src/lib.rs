@@ -107,3 +107,12 @@ pub fn run() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+/// 进程已运行毫秒数：前端用它换算「进程启动 → 页面加载」的冷启动间隙（WebView2 拉起成本）
+#[tauri::command]
+fn uptime_ms() -> u128 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis())
+        .unwrap_or(0)
+}
