@@ -12,6 +12,7 @@ function getStore(): Promise<Store> {
 
 export const useSettingsStore = defineStore('settings', () => {
   const theme = ref<Theme>('light')
+  const editorVisible = ref(false)
 
   function applyTheme(t: Theme): void {
     theme.value = t
@@ -25,7 +26,9 @@ export const useSettingsStore = defineStore('settings', () => {
     try {
       const s = await getStore()
       const saved = await s.get<Theme>('theme')
+      const savedEditorVisible = await s.get<boolean>('editorVisible')
       if (saved === 'light' || saved === 'dark') applyTheme(saved)
+      if (typeof savedEditorVisible === 'boolean') editorVisible.value = savedEditorVisible
     } catch {
       // 纯浏览器 / 测试环境无 tauri，保持默认
     }
@@ -42,9 +45,20 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
+  async function setEditorVisible(visible: boolean): Promise<void> {
+    editorVisible.value = visible
+    try {
+      const s = await getStore()
+      await s.set('editorVisible', visible)
+      await s.save()
+    } catch {
+      // 纯浏览器 / 测试环境忽略持久化失败
+    }
+  }
+
   function toggle(): Promise<void> {
     return setTheme(theme.value === 'light' ? 'dark' : 'light')
   }
 
-  return { theme, load, setTheme, toggle }
+  return { theme, editorVisible, load, setTheme, setEditorVisible, toggle }
 })

@@ -49,6 +49,11 @@ const emit = defineEmits<{ (e: 'select', slug: string): void }>()
   white-space: nowrap;
 }
 .toc-item:hover {
-  color: var(--accent);
+  color: var(--sidebar-selected-text);
+  background: var(--sidebar-hover-bg);
+}
+.toc-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 </style>

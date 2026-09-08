@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch, nextTick, computed } from 'vue'
 import TabBar from '@/components/TabBar.vue'
 import Toolbar from '@/components/Toolbar.vue'
-import RecentsMenu from '@/components/RecentsMenu.vue'
-import TocSidebar from '@/components/TocSidebar.vue'
+import WorkspaceSidebar from '@/components/WorkspaceSidebar.vue'
 import Editor from '@/components/Editor.vue'
 import Preview from '@/components/Preview.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -21,6 +20,9 @@ const recents = useRecentsStore()
 
 const editorRef = ref<InstanceType<typeof Editor> | null>(null)
 const previewRef = ref<InstanceType<typeof Preview> | null>(null)
+const sidebarOpen = ref(true)
+
+const documentTitle = computed(() => tabs.activeTab?.title ?? '未命名')
 
 async function openPath(path: string): Promise<void> {
   try {
@@ -141,13 +143,20 @@ onMounted(async () => {
   performance.mark('app:mounted')
   await settings.load()
   await recents.load()
+  sidebarOpen.value = true
   if (tabs.tabs.length === 0) tabs.newTab()
   unbindShortcuts = registerShortcuts({
     save: saveActive,
     open: openDialog,
     newTab: () => { tabs.newTab() },
     print: printPage,
-    search: () => editorRef.value?.focusSearch(),
+    search: () => {
+      if (!settings.editorVisible) {
+        void settings.setEditorVisible(true).then(() => nextTick(() => editorRef.value?.focusSearch()))
+      } else {
+        editorRef.value?.focusSearch()
+      }
+    },
     nextTab: () => tabs.stepTab(1),
     prevTab: () => tabs.stepTab(-1),
   })
@@ -227,23 +236,40 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="app-shell">
-    <Toolbar @open="openDialog" @new="tabs.newTab()" @save="saveActive" @export-html="exportHtml" @print="printPage">
+    <Toolbar
+      :sidebar-open="sidebarOpen"
+      :editor-visible="settings.editorVisible"
+      :document-title="documentTitle"
+      @open="openDialog"
+      @new="tabs.newTab()"
+      @save="saveActive"
+      @export-html="exportHtml"
+      @print="printPage"
+      @toggle-sidebar="sidebarOpen = !sidebarOpen"
+      @toggle-editor="settings.setEditorVisible(!settings.editorVisible)"
+    >
       <template #recents>
-        <RecentsMenu @open="(path) => void openPath(path)" />
+        <span class="toolbar-recent">{{ recents.items.length }} 个文档</span>
       </template>
     </Toolbar>
     <TabBar @close="onCloseTab" />
     <div class="main-area">
-      <div class="editor-pane">
-        <Editor ref="editorRef" @ready="onEditorReady" />
-      </div>
-      <div class="preview-wrap">
-        <Preview ref="previewRef" />
-      </div>
-      <TocSidebar
-        :items="previewRef?.tocItems ?? []"
-        @select="(slug) => previewRef?.scrollToHeading(slug)"
+      <WorkspaceSidebar
+        :open="sidebarOpen"
+        :recent-items="recents.items"
+        :toc-items="previewRef?.tocItems ?? []"
+        @close="sidebarOpen = false"
+        @open-recent="(path) => void openPath(path)"
+        @select-toc="(slug) => previewRef?.scrollToHeading(slug)"
       />
+      <div class="content-area" :class="{ 'reading-mode': !settings.editorVisible }">
+        <div v-if="settings.editorVisible" class="editor-pane">
+          <Editor ref="editorRef" @ready="onEditorReady" />
+        </div>
+        <div class="preview-wrap">
+          <Preview ref="previewRef" />
+        </div>
+      </div>
     </div>
     <ConfirmDialog
       v-if="confirmVisible"
@@ -268,14 +294,29 @@ onBeforeUnmount(() => {
   flex: 1;
   display: flex;
   min-height: 0;
+  min-width: 0;
+}
+.content-area {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
 }
 .editor-pane {
-  flex: 1;
+  flex: 0 0 42%;
   min-width: 0;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--separator);
 }
 .preview-wrap {
   flex: 1;
   min-width: 0;
+  background: var(--bg-preview);
 }
+.content-area.reading-mode .preview-wrap { width: 100%; }
+.toolbar-recent { color: var(--text-secondary); font-size: 11px; white-space: nowrap; }
+@media (max-width: 900px) {
+  .workspace-sidebar { width: 210px; flex-basis: 210px; }
+  .document-title { display: none; }
+}
+
 </style>

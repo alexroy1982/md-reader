@@ -70,6 +70,7 @@
   .tab-bar,
   .toolbar,
   .toc-sidebar,
+  .workspace-sidebar,
   .editor-pane {
     display: none !important;
   }
