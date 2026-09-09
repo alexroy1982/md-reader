@@ -6,3 +6,8 @@ src-tauri/gen/
 *.local
 .DS_Store
 *.log
+
+# 根目录杂物不入库：截图、导出物、个人文档（截图入库放 docs/screenshots/）
+/*.png
+/PRD-*.html
+/未读邮件摘要*.md
