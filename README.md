@@ -57,6 +57,3 @@ npm run tauri build    # 产出 NSIS 安装包（src-tauri/target/release/bundle
 
 Tauri 2 · Vue 3 · Pinia · CodeMirror 6 · markdown-it · highlight.js · KaTeX · Mermaid
 
-## 文档
-
-- [产品需求文档（PRD）](PRD-Markdown阅读器.md)

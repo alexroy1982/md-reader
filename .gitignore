@@ -10,4 +10,10 @@ src-tauri/gen/
 # 根目录杂物不入库：截图、导出物、个人文档（截图入库放 docs/screenshots/）
 /*.png
 /PRD-*.html
+/PRD-*.md
 /未读邮件摘要*.md
+
+# 仓库只保留程序必需 + README：会话文档/计划/夹具一律不入库
+/docs/*
+!/docs/screenshots/
+/test-fixtures/
