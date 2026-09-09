@@ -44,6 +44,11 @@
   --syntax-label: #6639ba;
   --syntax-escape: #0550ae;
   --syntax-list: #1f2328;
+  --syntax-comment: #6e7781;
+  --syntax-keyword: #cf222e;
+  --syntax-string: #0a3069;
+  --syntax-number: #0550ae;
+  --syntax-type: #953800;
 }
 
 [data-theme='dark'] {
@@ -91,4 +96,9 @@
   --syntax-label: #d2a8ff;
   --syntax-escape: #79c0ff;
   --syntax-list: #e6edf3;
+  --syntax-comment: #8b949e;
+  --syntax-keyword: #ff7b72;
+  --syntax-string: #a5d6ff;
+  --syntax-number: #79c0ff;
+  --syntax-type: #ffa657;
 }

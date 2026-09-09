@@ -22,6 +22,13 @@ export const markdownHighlightSpec = [
   { tag: t.labelName, color: 'var(--syntax-label)' },
   { tag: t.escape, color: 'var(--syntax-escape)' },
   { tag: t.character, color: 'var(--syntax-escape)' },
+  // 程序语言标签：围栏代码块经嵌套语言解析产出（keyword/string/comment 等），
+  // 缺了会导致识别语言的代码块整块继承正文色（defaultHighlightStyle 被替换后这是唯一来源）
+  { tag: t.comment, color: 'var(--syntax-comment)', fontStyle: 'italic' },
+  { tag: t.keyword, color: 'var(--syntax-keyword)' },
+  { tag: t.string, color: 'var(--syntax-string)' },
+  { tag: [t.number, t.atom], color: 'var(--syntax-number)' },
+  { tag: t.typeName, color: 'var(--syntax-type)' },
 ]
 
 export const markdownHighlightStyle = HighlightStyle.define(markdownHighlightSpec)
