@@ -26,13 +26,16 @@ function currentDoc(): string {
 
 onMounted(async () => {
   // CodeMirror 全家桶（数百 KB）从主包移出：编辑器组件壳先渲染，CM 异步就绪
+  // highlight 模块静态依赖 @codemirror/view，必须与 CM 一起动态加载，避免回到主包
   const [
     { EditorView, keymap },
     { EditorState },
     { markdown, markdownLanguage },
     { defaultKeymap, history, historyKeymap, indentWithTab },
     { searchKeymap, openSearchPanel, highlightSelectionMatches },
-    { syntaxHighlighting, defaultHighlightStyle },
+    { syntaxHighlighting },
+    { markdownHighlightStyle },
+    { languages },
   ] = await Promise.all([
     import('@codemirror/view'),
     import('@codemirror/state'),
@@ -40,6 +43,8 @@ onMounted(async () => {
     import('@codemirror/commands'),
     import('@codemirror/search'),
     import('@codemirror/language'),
+    import('@/lib/codemirror/highlight'),
+    import('@codemirror/language-data'),
   ])
 
   openSearchPanelFn = openSearchPanel
@@ -74,8 +79,8 @@ onMounted(async () => {
       doc: currentDoc(),
       extensions: [
         history(),
-        markdown({ base: markdownLanguage }),
-        syntaxHighlighting(defaultHighlightStyle),
+        markdown({ base: markdownLanguage, codeLanguages: languages }),
+        syntaxHighlighting(markdownHighlightStyle),
         highlightSelectionMatches(),
         EditorView.lineWrapping,
         cmTheme,
