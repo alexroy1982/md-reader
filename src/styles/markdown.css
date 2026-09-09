@@ -1,16 +1,81 @@
 /* 渲染区排版：github-markdown-css 在 main.ts 引入，这里做主题变量覆盖 + 插件样式 */
 
+/* 滚动容器：阅读模式下同时是纸张外围的 backdrop */
+.preview-scroll {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-preview);
+}
+
 .markdown-body {
   background: var(--bg-preview);
   color: var(--text-primary);
   padding: 24px 32px;
-  overflow-y: auto;
-  height: 100%;
+  min-height: 100%;
   box-sizing: border-box;
+  /* 预览内容任何模式下都不超过 A4 宽度：4K 分屏时半个窗口极宽，文字行长不可控 */
+  max-width: 210mm;
+  margin: 0 auto;
 }
 
 [data-theme='dark'] .markdown-body {
   color-scheme: dark;
+}
+
+/* 阅读模式：A4 纸张视图。210mm = A4 宽度（96dpi 下 794px），15mm 内边距 = 打印页边距，
+   屏上正文线长与打印输出严格一致。前缀提高优先级，覆盖运行时注入的 github-markdown-css。 */
+html[data-theme] .reading-mode .preview-scroll {
+  background: var(--bg-backdrop);
+  padding: 28px 24px;
+}
+
+html[data-theme] .reading-mode .markdown-body {
+  width: 210mm;
+  max-width: 100%;
+  min-height: calc(100% - 56px);
+  margin: 0 auto;
+  padding: 15mm;
+  background: var(--bg-paper);
+  border-radius: 6px;
+  box-shadow: var(--paper-shadow);
+}
+
+/* 密集文档排版：呼吸感。前缀提高优先级，覆盖运行时注入的 github-markdown-css。 */
+html[data-theme] .markdown-body {
+  line-height: 1.72;
+  text-align: justify;
+}
+
+html[data-theme] .markdown-body p {
+  margin-top: 0;
+  margin-bottom: 1.25em;
+}
+
+html[data-theme] .markdown-body li + li {
+  margin-top: .35em;
+}
+
+/* 列表内段落保持紧凑，避免叠加段距后列表被撑爆 */
+html[data-theme] .markdown-body li > p {
+  margin-top: 0;
+  margin-bottom: .45em;
+}
+
+/* 标题分区间距：章节上方留白拉出分隔感 */
+html[data-theme] .markdown-body h2,
+html[data-theme] .markdown-body h3,
+html[data-theme] .markdown-body h4 {
+  margin-top: 1.8em;
+  margin-bottom: .7em;
+}
+
+/* 行内代码降噪：底色减淡、字号微降，不与正文抢视觉；:not(pre) 保证代码块内不受影响 */
+html[data-theme] .markdown-body :not(pre) > code {
+  background: var(--inline-code-bg);
+  font-size: .825em;
+  padding: .15em .4em;
+  border-radius: 5px;
 }
 
 /* 表格：精致的 macOS 文档风格。提高选择器优先级，覆盖运行时后注入的 github-markdown-css。 */
@@ -163,7 +228,12 @@ html[data-theme] .markdown-body table th > :last-child {
 [data-theme='dark'] .hljs-title.function_ { color: #d2a8ff; }
 [data-theme='dark'] .hljs-built_in { color: #ffa657; }
 
-/* 打印：只输出预览区 */
+/* 打印：A4 页面 + 15mm 页边距（与屏幕纸张内边距一致，所见即打印），只输出预览区 */
+@page {
+  size: A4;
+  margin: 15mm;
+}
+
 @media print {
   .tab-bar,
   .toolbar,
@@ -172,9 +242,24 @@ html[data-theme] .markdown-body table th > :last-child {
   .editor-pane {
     display: none !important;
   }
+  .preview-wrap {
+    width: 100% !important;
+  }
+  .preview-scroll {
+    height: auto !important;
+    overflow: visible !important;
+    background: none !important;
+    padding: 0 !important;
+  }
   .preview-pane {
     width: 100% !important;
     height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
   }
 }

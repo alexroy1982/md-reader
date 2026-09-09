@@ -10,6 +10,7 @@ const tabs = useTabsStore()
 const settings = useSettingsStore()
 
 const rootEl = ref<HTMLElement | null>(null)
+const scrollerEl = ref<HTMLElement | null>(null)
 const result = ref<RenderResult>({ html: '', toc: [] })
 const tocItems = ref<TocItem[]>([])
 
@@ -64,7 +65,8 @@ function scrollToHeading(slug: string): void {
 }
 
 function scrollEl(): HTMLElement | null {
-  return rootEl.value
+  // 滚动发生在包装层（阅读模式下它是纸张外围 backdrop），不是纸张本体
+  return scrollerEl.value
 }
 
 function bodyHtml(): string {
@@ -75,5 +77,7 @@ defineExpose({ tocItems, scrollToHeading, scrollEl, bodyHtml })
 </script>
 
 <template>
-  <div ref="rootEl" class="preview-pane markdown-body" v-html="result.html"></div>
+  <div ref="scrollerEl" class="preview-scroll">
+    <div ref="rootEl" class="preview-pane markdown-body" v-html="result.html"></div>
+  </div>
 </template>
