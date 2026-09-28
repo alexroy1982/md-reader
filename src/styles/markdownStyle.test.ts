@@ -86,4 +86,10 @@ describe('密集文档排版呼吸感', () => {
     expect(markdownCss).toMatch(/\.markdown-body \{[^}]*max-width: 210mm/)
     expect(markdownCss).toMatch(/\.markdown-body \{[^}]*margin: 0 auto/)
   })
+
+  it('代码块长行在纸张内折行，不被 overflow 裁剪（cookie 等超长无空格串）', () => {
+    expect(markdownCss).toMatch(/html\[data-theme\] \.markdown-body pre \{[^}]*overflow-x: hidden/)
+    expect(markdownCss).toMatch(/html\[data-theme\] \.markdown-body pre > code \{[^}]*white-space: pre-wrap/)
+    expect(markdownCss).toMatch(/html\[data-theme\] \.markdown-body pre > code \{[^}]*overflow-wrap: anywhere/)
+  })
 })

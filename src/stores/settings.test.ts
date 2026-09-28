@@ -18,6 +18,9 @@ beforeEach(() => {
   setActivePinia(createPinia())
   storeData.clear()
   vi.clearAllMocks()
+  // 隔离上一条用例残留的主题状态，保证「全新安装」场景真实
+  delete document.documentElement.dataset.theme
+  document.getElementById('gh-markdown-theme')?.remove()
 })
 
 describe('settings store', () => {
@@ -40,6 +43,17 @@ describe('settings store', () => {
     await s.load()
     expect(s.theme).toBe('dark')
     expect(document.documentElement.dataset.theme).toBe('dark')
+  })
+
+  it('load 无保存记录（全新安装）也注入默认主题样式', async () => {
+    // index.html 预置 data-theme="light" 让主题变量生效，但 github-markdown-css
+    // 只能由 applyTheme 注入；跳过注入会导致 <pre> 无 overflow 样式，长行溢出纸张
+    const s = useSettingsStore()
+    await s.load()
+    expect(document.documentElement.dataset.theme).toBe('light')
+    const el = document.getElementById('gh-markdown-theme')
+    expect(el).not.toBeNull()
+    expect(el!.textContent).toContain('.markdown-body pre')
   })
 
   it('setTheme 注入对应主题的 github-markdown 样式', async () => {

@@ -78,6 +78,19 @@ html[data-theme] .markdown-body :not(pre) > code {
   border-radius: 5px;
 }
 
+/* 代码块长行在纸张内折行：cookie/密钥等超长无空格串不能溢出 A4 页面，
+   打印/导出 PDF 时也不能被 overflow 裁剪（与表格的折行策略一致）。
+   覆盖 github-markdown-css 的 overflow: auto 与 pre > code 的 white-space: pre。 */
+html[data-theme] .markdown-body pre {
+  overflow-x: hidden;
+}
+
+html[data-theme] .markdown-body pre > code {
+  white-space: pre-wrap;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
 /* 表格：精致的 macOS 文档风格。提高选择器优先级，覆盖运行时后注入的 github-markdown-css。 */
 html[data-theme] .markdown-body table {
   display: table;

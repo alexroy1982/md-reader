@@ -23,15 +23,20 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function load(): Promise<void> {
+    let saved: Theme | null = null
+    let savedEditorVisible: boolean | null = null
     try {
       const s = await getStore()
-      const saved = await s.get<Theme>('theme')
-      const savedEditorVisible = await s.get<boolean>('editorVisible')
-      if (saved === 'light' || saved === 'dark') applyTheme(saved)
-      if (typeof savedEditorVisible === 'boolean') editorVisible.value = savedEditorVisible
+      saved = await s.get<Theme>('theme')
+      savedEditorVisible = await s.get<boolean>('editorVisible')
     } catch {
-      // 纯浏览器 / 测试环境无 tauri，保持默认
+      // 纯浏览器 / 测试环境无 tauri：无持久化配置，走默认主题
     }
+    // index.html 只预置了 data-theme 属性，github-markdown-css 必须由 applyTheme 注入。
+    // 全新安装（从未保存过主题）也必须走一次，否则 <pre> 缺 overflow/背景样式，
+    // 超长无空格行会溢出 A4 纸张。放在 try 外：存储异常不能连坐样式注入
+    applyTheme(saved === 'dark' ? 'dark' : 'light')
+    if (typeof savedEditorVisible === 'boolean') editorVisible.value = savedEditorVisible
   }
 
   async function setTheme(t: Theme): Promise<void> {
