@@ -11,6 +11,7 @@ export default defineConfig({
   },
   clearScreen: false,
   server: { port: 1420, strictPort: true },
-  build: { chunkSizeWarningLimit: 3000 },
+  // 中间产物放 .build/web，根目录 dist/ 保留给最终交付物（见 scripts/copy-dist.mjs）
+  build: { chunkSizeWarningLimit: 3000, outDir: '.build/web' },
   test: { environment: 'jsdom', css: true },
 })
