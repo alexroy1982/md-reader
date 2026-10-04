@@ -13,7 +13,7 @@
     "dialog:allow-save",
     "fs:allow-read-text-file",
     "fs:allow-write-text-file",
-    "fs:allow-watch-immediate",
+    "fs:allow-watch",
     { "identifier": "fs:scope", "allow": ["**"] },
     "store:default",
     "window-state:default"

@@ -16,7 +16,7 @@ describe('tauri capabilities', () => {
     expect(caps.permissions).toContain('core:window:allow-destroy')
   })
 
-  it('包含 fs:allow-watch-immediate（外部修改自动刷新的目录监听依赖它）', () => {
-    expect(caps.permissions).toContain('fs:allow-watch-immediate')
+  it('包含 fs:allow-watch（外部修改自动刷新的 watchImmediate 依赖它；watchImmediate 与 watch 共用同一权限，插件无 fs:allow-watch-immediate）', () => {
+    expect(caps.permissions).toContain('fs:allow-watch')
   })
 })
