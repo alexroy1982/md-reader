@@ -15,4 +15,8 @@ describe('tauri capabilities', () => {
   it('包含 core:window:allow-destroy（onCloseRequested 未拦截时 Tauri 自动 destroy，缺它窗口永远无法关闭）', () => {
     expect(caps.permissions).toContain('core:window:allow-destroy')
   })
+
+  it('包含 fs:allow-watch-immediate（外部修改自动刷新的目录监听依赖它）', () => {
+    expect(caps.permissions).toContain('fs:allow-watch-immediate')
+  })
 })
