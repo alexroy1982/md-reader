@@ -106,9 +106,10 @@ onMounted(async () => {
   emit('ready')
 })
 
-// 切换标签：编辑器内容跟随（updateListener 已保证 store 内容最新）
+// 切换标签、或内容被外部更新（文件监听刷新）：编辑器文档跟随。
+// updateListener 已保证用户编辑实时写入 store；此处等值守卫防止循环。
 watch(
-  () => tabs.activeId,
+  () => [tabs.activeId, tabs.activeTab?.content],
   () => {
     if (!view) return
     const doc = currentDoc()

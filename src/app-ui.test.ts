@@ -18,4 +18,9 @@ describe('App UI 回归', () => {
   it('编辑器按需挂载（默认阅读模式不挂载 Editor）', () => {
     expect(appSource).toContain('v-if="settings.editorVisible"')
   })
+
+  it('编辑器文档跟随标签内容变化（外部文件刷新后编辑器不残留旧文档）', () => {
+    const editorSource = readFileSync('src/components/Editor.vue', 'utf-8')
+    expect(editorSource).toMatch(/tabs\.activeId,\s*tabs\.activeTab\?\.content/)
+  })
 })
