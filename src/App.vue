@@ -11,6 +11,7 @@ import { useSettingsStore } from '@/stores/settings'
 import { useRecentsStore, fileName } from '@/stores/recents'
 import { registerShortcuts } from '@/composables/useShortcuts'
 import { setupScrollSync } from '@/composables/useScrollSync'
+import { setupExternalFileSync } from '@/composables/useFileWatch'
 import { openMarkdownDialog, saveMarkdownDialog, readMarkdown, writeMarkdown } from '@/composables/useFileIO'
 import { exportCurrentHtml } from '@/composables/useExport'
 
@@ -136,6 +137,7 @@ let unbindShortcuts: (() => void) | null = null
 let unlistenOpenFile: (() => void) | null = null
 let unlistenDragDrop: (() => void) | null = null
 let unlistenClose: (() => void) | null = null
+let cleanupFileWatch: (() => void) | null = null
 
 onMounted(async () => {
   performance.mark('app:mounted')
@@ -165,6 +167,9 @@ onMounted(async () => {
       void openPath(event.payload)
     })
     await emit('frontend-ready')
+
+    // 外部修改自动刷新：监听打开文件所在目录，即时刷新干净标签
+    cleanupFileWatch = setupExternalFileSync()
 
     const { getCurrentWebviewWindow } = await import('@tauri-apps/api/webviewWindow')
     const { getCurrentWindow } = await import('@tauri-apps/api/window')
@@ -228,6 +233,7 @@ onBeforeUnmount(() => {
   unlistenOpenFile?.()
   unlistenDragDrop?.()
   unlistenClose?.()
+  cleanupFileWatch?.()
 })
 </script>
 

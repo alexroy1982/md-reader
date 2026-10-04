@@ -43,6 +43,15 @@ export const useTabsStore = defineStore('tabs', () => {
     if (tab) tab.savedContent = tab.content
   }
 
+  // 外部文件变更写入：content 与 savedContent 必须同步，否则干净标签会被
+  // isDirty（content !== savedContent）误判为脏，关闭时误弹保存确认
+  function applyExternalContent(path: string, content: string): void {
+    const tab = tabs.value.find((t) => t.path === path)
+    if (!tab) return
+    tab.content = content
+    tab.savedContent = content
+  }
+
   function closeTab(id: string): void {
     const idx = tabs.value.findIndex((t) => t.id === id)
     if (idx === -1) return
@@ -64,5 +73,5 @@ export const useTabsStore = defineStore('tabs', () => {
     activeId.value = tabs.value[(idx + delta + n) % n].id
   }
 
-  return { tabs, activeId, activeTab, isDirty, newTab, openFileTab, updateContent, markSaved, closeTab, setActive, stepTab }
+  return { tabs, activeId, activeTab, isDirty, newTab, openFileTab, updateContent, markSaved, applyExternalContent, closeTab, setActive, stepTab }
 })
