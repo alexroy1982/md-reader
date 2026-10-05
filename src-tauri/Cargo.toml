@@ -14,7 +14,8 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 tauri-plugin-single-instance = "2"
 tauri-plugin-store = "2"
-tauri-plugin-fs = "2"
+# watch feature：plugin:fs|watch 命令（外部修改自动刷新）由 #[cfg(feature = "watch")] 门控，不开则运行时报 Command watch not found
+tauri-plugin-fs = { version = "2", features = ["watch"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-window-state = "2"
 serde = { version = "1", features = ["derive"] }
