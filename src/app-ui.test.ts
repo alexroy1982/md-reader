@@ -32,4 +32,14 @@ describe('App UI 回归', () => {
     expect(previewSource).toContain("querySelectorAll('mark.pv-search-hit')")
     expect(previewSource).toMatch(/watch\(\s*\(\) => settings\.editorVisible/)
   })
+
+  it('Ctrl+F 分流：阅读模式走预览搜索，不再强制显示编辑器', () => {
+    const handler = appSource.match(/search: \(\) => \{[\s\S]*?\n    \},/)
+    expect(handler).toBeTruthy()
+    expect(handler![0]).toContain('settings.editorVisible')
+    expect(handler![0]).toContain('if (!settings.editorVisible)')
+    expect(handler![0]).toContain('previewRef.value?.openSearch()')
+    expect(handler![0]).toContain('editorRef.value?.focusSearch()')
+    expect(handler![0]).not.toContain('setEditorVisible')
+  })
 })

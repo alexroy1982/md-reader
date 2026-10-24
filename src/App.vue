@@ -150,8 +150,9 @@ onMounted(async () => {
     newTab: () => { tabs.newTab() },
     print: printPage,
     search: () => {
+      // 阅读模式：预览区搜索；编辑器可见：CodeMirror 搜索面板（编辑器内 Ctrl+F 本就由 searchKeymap 处理）
       if (!settings.editorVisible) {
-        void settings.setEditorVisible(true).then(() => nextTick(() => editorRef.value?.focusSearch()))
+        previewRef.value?.openSearch()
       } else {
         editorRef.value?.focusSearch()
       }
