@@ -11,6 +11,15 @@ mark.pv-search-hit-current {
   background: #f0883e;
   color: #1f2328;
 }
+/* 运行时暗色主题样式后注入，提高优先级避免 github-markdown-css 的 mark 覆盖搜索高亮 */
+html[data-theme='dark'] .markdown-body mark.pv-search-hit {
+  background: #f2cc60;
+  color: #1f2328;
+}
+html[data-theme='dark'] .markdown-body mark.pv-search-hit-current {
+  background: #f0883e;
+  color: #1f2328;
+}
 
 /* preview-host：定位上下文（搜索条绝对定位于此），不参与滚动 */
 .preview-host {

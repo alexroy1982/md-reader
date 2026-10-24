@@ -59,6 +59,34 @@ describe('A4 纸张阅读视图', () => {
   })
 })
 
+describe('预览搜索高亮主题适配', () => {
+  it('暗色搜索高亮使用实色亮黄/橙色与深色文字，普通与当前命中均清晰可辨', () => {
+    const style = document.createElement('style')
+    const host = document.createElement('div')
+    // jsdom 不计算选择器优先级、只认规则顺序，故将 GitHub 的冲突规则放前面；
+    // 真实浏览器中的后注入覆盖由冒烟测试验证。
+    style.textContent =
+      '.markdown-body mark { background-color: #bb800926; color: #f0f6fc; }\n' +
+      markdownCss
+    host.className = 'markdown-body'
+    host.innerHTML = '<mark class="pv-search-hit">普通</mark><mark class="pv-search-hit pv-search-hit-current">当前</mark>'
+    document.documentElement.dataset.theme = 'dark'
+    document.head.appendChild(style)
+    document.body.appendChild(host)
+    try {
+      const [normal, current] = Array.from(host.querySelectorAll('mark'))
+      expect(getComputedStyle(normal).backgroundColor).toBe('rgb(242, 204, 96)')
+      expect(getComputedStyle(normal).color).toBe('rgb(31, 35, 40)')
+      expect(getComputedStyle(current).backgroundColor).toBe('rgb(240, 136, 62)')
+      expect(getComputedStyle(current).color).toBe('rgb(31, 35, 40)')
+    } finally {
+      style.remove()
+      host.remove()
+      delete document.documentElement.dataset.theme
+    }
+  })
+})
+
 describe('密集文档排版呼吸感', () => {
   it('正文行距放宽并两端对齐', () => {
     expect(markdownCss).toContain('line-height: 1.72')
