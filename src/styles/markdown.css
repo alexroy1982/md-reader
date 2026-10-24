@@ -1,5 +1,17 @@
 /* 渲染区排版：github-markdown-css 在 main.ts 引入，这里做主题变量覆盖 + 插件样式 */
 
+/* 预览搜索高亮：mark 由 previewSearch 动态注入 v-html 内容，scoped 样式够不着，必须全局 */
+mark.pv-search-hit {
+  background: rgba(255, 213, 0, 0.4);
+  color: inherit;
+  padding: 0;
+  border-radius: 2px;
+}
+mark.pv-search-hit-current {
+  background: #f0883e;
+  color: #1f2328;
+}
+
 /* 滚动容器：阅读模式下同时是纸张外围的 backdrop */
 .preview-scroll {
   height: 100%;
@@ -252,6 +264,7 @@ html[data-theme] .markdown-body table th > :last-child {
   .toolbar,
   .toc-sidebar,
   .workspace-sidebar,
+  .search-bar,
   .editor-pane {
     display: none !important;
   }
