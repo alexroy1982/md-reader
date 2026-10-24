@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { findMatches } from './previewSearch'
+import { findMatches, applyHighlights } from './previewSearch'
 
 // jsdom 全局生效（vite.config.ts: environment: 'jsdom'），直接建 DOM
 function setup(html: string): HTMLElement {
@@ -54,6 +54,62 @@ describe('findMatches', () => {
   it('空查询返回空数组', () => {
     const root = setup('<p>foo</p>')
     expect(findMatches(root, '')).toHaveLength(0)
+    root.remove()
+  })
+})
+
+describe('applyHighlights', () => {
+  it('命中区间包上 mark.pv-search-hit，按文档序返回', () => {
+    const root = setup('<p>ab cd</p><p>zzab</p>')
+    const { marks, cleanup } = applyHighlights(findMatches(root, 'ab'))
+    expect(marks.map((m) => m.textContent)).toEqual(['ab', 'ab'])
+    expect(marks.every((m) => m.className === 'pv-search-hit')).toBe(true)
+    // 文档序：第一个 mark 在第一个 p 里
+    expect(marks[0].closest('p')).toBe(root.querySelectorAll('p')[0])
+    cleanup()
+    root.remove()
+  })
+
+  it('同节点多命中全部高亮且周围文本不丢', () => {
+    const root = setup('<p>xabABx</p>')
+    const { marks, cleanup } = applyHighlights(findMatches(root, 'ab'))
+    expect(marks).toHaveLength(2)
+    expect(marks.map((m) => m.textContent)).toEqual(['ab', 'AB'])
+    expect(root.querySelector('p')!.textContent).toBe('xabABx')
+    expect(root.querySelector('p')!.innerHTML).toBe('x<mark class="pv-search-hit">ab</mark><mark class="pv-search-hit">AB</mark>x')
+    cleanup()
+    root.remove()
+  })
+
+  it('cleanup 完全恢复原 DOM：文本内容不变且相邻文本节点 normalize 合并', () => {
+    const root = setup('<p>xabxabx</p>')
+    const before = root.querySelector('p')!.childNodes.length // 1 个文本节点
+    const { cleanup } = applyHighlights(findMatches(root, 'ab'))
+    cleanup()
+    const p = root.querySelector('p')!
+    expect(p.textContent).toBe('xabxabx')
+    expect(p.childNodes.length).toBe(before)
+    root.remove()
+  })
+
+  it('cleanup 保留嵌套元素且可重复调用', () => {
+    const root = setup('<p>before <strong>ab</strong> after</p>')
+    const before = root.innerHTML
+    const strong = root.querySelector('strong')
+    const { cleanup } = applyHighlights(findMatches(root, 'ab'))
+    cleanup()
+    expect(root.innerHTML).toBe(before)
+    expect(root.querySelector('strong')).toBe(strong)
+    expect(() => cleanup()).not.toThrow()
+    expect(root.innerHTML).toBe(before)
+    root.remove()
+  })
+
+  it('cleanup 对已脱离文档的 mark 不抛错（v-html 重渲染后旧引用）', () => {
+    const root = setup('<p>ab</p>')
+    const { cleanup } = applyHighlights(findMatches(root, 'ab'))
+    root.innerHTML = '' // 模拟 v-html 重渲染：旧 mark 全部脱离文档
+    expect(() => cleanup()).not.toThrow()
     root.remove()
   })
 })
