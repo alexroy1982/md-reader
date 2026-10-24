@@ -79,11 +79,14 @@ describe('SearchBar 结构回归', () => {
 })
 
 describe('预览搜索全局样式', () => {
-  it('mark 两级高亮及打印隐藏搜索条', () => {
+  it('mark 两级高亮、打印隐藏搜索条并去除高亮色', () => {
     expect(markdownCss).toContain('mark.pv-search-hit {')
     expect(markdownCss).toContain('mark.pv-search-hit-current {')
     expect(markdownCss).toMatch(
       /@media print[\s\S]*\.search-bar,\s*\.editor-pane\s*\{\s*display:\s*none\s*!important;/,
+    )
+    expect(markdownCss).toMatch(
+      /@media print[\s\S]*mark\.pv-search-hit,\s*mark\.pv-search-hit-current\s*\{\s*background:\s*transparent\s*!important;\s*color:\s*inherit\s*!important;/,
     )
   })
 })

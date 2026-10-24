@@ -1,5 +1,5 @@
-// 预览区文本搜索核心：TreeWalker 遍历文本节点并计算命中区间。
-// 无 Vue 依赖，可独立单测。大小写不敏感，不支持跨元素边界匹配（v1 已知限制）。
+// 预览区文本搜索核心：TreeWalker 遍历文本节点，以原文 UTF-16 偏移计算命中区间。
+// 转义后的 literal 正则使用 /giu（Unicode simple case folding），不跨元素边界匹配。
 
 export interface SearchMatch {
   node: Text
@@ -14,29 +14,28 @@ export interface AppliedHighlights {
   cleanup: () => void
 }
 
-const SKIP_SELECTOR = 'svg, script, style'
+const SKIP_SELECTOR = 'svg, script, style, .mermaid-source:not(.mermaid-source-visible)'
 
 export function findMatches(root: ParentNode, query: string): SearchMatch[] {
   if (!query) return []
-  const needle = query.toLowerCase()
+  const needle = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu')
   const matches: SearchMatch[] = []
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const parent = (node as Text).parentElement
-      // mermaid 图是 svg、代码高亮以外的脚本样式都在这三类里，整棵跳过
+      // 跳过图形、脚本样式及默认隐藏的 Mermaid 源码；显式可见源码仍可搜索
       if (parent && parent.closest(SKIP_SELECTOR)) return NodeFilter.FILTER_REJECT
       return NodeFilter.FILTER_ACCEPT
     },
   })
   let current = walker.nextNode() as Text | null
   while (current) {
-    const haystack = current.data.toLowerCase()
-    let from = 0
-    for (;;) {
-      const idx = haystack.indexOf(needle, from)
-      if (idx === -1) break
-      matches.push({ node: current, start: idx, end: idx + needle.length })
-      from = idx + needle.length // 非重叠命中
+    needle.lastIndex = 0
+    let found = needle.exec(current.data)
+    while (found) {
+      const start = found.index
+      matches.push({ node: current, start, end: start + found[0].length })
+      found = needle.exec(current.data) // global exec 天然非重叠，偏移始终基于原文
     }
     current = walker.nextNode() as Text | null
   }

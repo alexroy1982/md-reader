@@ -12,6 +12,12 @@ mark.pv-search-hit-current {
   color: #1f2328;
 }
 
+/* preview-host：定位上下文（搜索条绝对定位于此），不参与滚动 */
+.preview-host {
+  position: relative;
+  height: 100%;
+}
+
 /* 滚动容器：阅读模式下同时是纸张外围的 backdrop */
 .preview-scroll {
   height: 100%;
@@ -267,6 +273,11 @@ html[data-theme] .markdown-body table th > :last-child {
   .search-bar,
   .editor-pane {
     display: none !important;
+  }
+  mark.pv-search-hit,
+  mark.pv-search-hit-current {
+    background: transparent !important;
+    color: inherit !important;
   }
   .preview-wrap {
     width: 100% !important;

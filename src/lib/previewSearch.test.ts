@@ -56,6 +56,42 @@ describe('findMatches', () => {
     expect(findMatches(root, '')).toHaveLength(0)
     root.remove()
   })
+
+  it('按原文 UTF-16 偏移处理 Unicode simple case folding', () => {
+    const root = setup('<p>İ foo</p>')
+    const unicodeMatches = findMatches(root, 'İ')
+    expect(unicodeMatches).toHaveLength(1)
+    expect(unicodeMatches[0].start).toBe(0)
+    expect(unicodeMatches[0].end).toBe(1)
+    const applied = applyHighlights(unicodeMatches)
+    expect(applied.marks).toHaveLength(1)
+    expect(applied.marks[0].textContent).toBe('İ')
+    applied.cleanup()
+
+    const fooMatches = findMatches(root, 'foo')
+    expect(fooMatches).toHaveLength(1)
+    expect(fooMatches[0].start).toBe(2)
+    expect(fooMatches[0].end).toBe(5)
+    root.remove()
+  })
+
+  it('正则元字符仍按字面文本搜索', () => {
+    const root = setup('<p>a.b aXb</p>')
+    const matches = findMatches(root, 'a.b')
+    expect(matches).toHaveLength(1)
+    expect(matches[0].start).toBe(0)
+    expect(matches[0].end).toBe(3)
+    root.remove()
+  })
+
+  it('跳过默认隐藏的 Mermaid 源码但包含显式可见源码', () => {
+    const root = setup('<p>hit</p><pre class="mermaid-source">hit</pre><pre class="mermaid-source mermaid-source-visible">hit</pre>')
+    const matches = findMatches(root, 'hit')
+    expect(matches).toHaveLength(2)
+    expect(matches[0].node.parentElement?.tagName).toBe('P')
+    expect(matches[1].node.parentElement?.classList.contains('mermaid-source-visible')).toBe(true)
+    root.remove()
+  })
 })
 
 describe('applyHighlights', () => {

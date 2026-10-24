@@ -23,4 +23,13 @@ describe('App UI 回归', () => {
     const editorSource = readFileSync('src/components/Editor.vue', 'utf-8')
     expect(editorSource).toMatch(/tabs\.activeId,\s*tabs\.activeTab\?\.content/)
   })
+
+  it('预览搜索接线：重渲染重跑、导出剥离高亮、切回编辑模式自动关闭', () => {
+    const previewSource = readFileSync('src/components/Preview.vue', 'utf-8')
+    expect(previewSource).toContain('openSearch')
+    expect(previewSource).toContain('pv-search-hit')
+    expect(previewSource).toContain('searchOpen.value && searchQuery.value')
+    expect(previewSource).toContain("querySelectorAll('mark.pv-search-hit')")
+    expect(previewSource).toMatch(/watch\(\s*\(\) => settings\.editorVisible/)
+  })
 })
