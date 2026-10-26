@@ -1,10 +1,16 @@
 # MD Reader
 
+[![GitHub release](https://img.shields.io/github/v/release/alexroy1982/md-reader.svg)](https://github.com/alexroy1982/md-reader/releases/latest)
+
 本地优先、双击即开的 Markdown 阅读/轻编辑桌面应用（Tauri 2 + Vue 3）。
 
 A4 纸张阅读视图，屏上排版与打印输出严格一致——看到什么样，打出来就是什么样。
 
 ![A4 纸张阅读视图](docs/screenshots/reading-view.png)
+*浅色主题 · A4 纸张阅读：公式、Mermaid 图表与目录大纲*
+
+![暗色主题搜索](docs/screenshots/search-view.png)
+*暗色主题 · `Ctrl+F` 全文搜索：高亮全部命中并计数跳转*
 
 ## 下载安装
 
@@ -19,6 +25,7 @@ A4 纸张阅读视图，屏上排版与打印输出严格一致——看到什�
 - **所见即打印**：打印/导出 PDF 走 `@page A4` + 15mm 页边距，屏上线长与打印输出一致
 - **精致排版**：1.72 行距、段落呼吸感、两端对齐、行内代码降噪、表格卡片式布局
 - 明暗主题一键切换，目录大纲（TOC）快速跳转
+- **全文搜索（`Ctrl+F`）**：实时高亮全部命中、`当前/总数` 计数，Enter / Shift+Enter 逐个跳转
 
 **编辑**
 - 分屏实时预览 + 上下滚动同步
